@@ -1,4 +1,4 @@
 # test
 Testing all the things
 
-[gitpage testing](awilh37.github.io/test/info)
+[gitpage testing](https://awilh37.github.io/test/info)
