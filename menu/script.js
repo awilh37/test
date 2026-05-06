@@ -22,10 +22,10 @@ var buttonWidth = 240;
 var selected = 0;
 
 var buttons = [
-  { x: 10, y: 10 },
-  { x: 10, y: 100 },
-  { x: 10, y: 190 },
-  { x: 10, y: 280 },
+  { x: 10, y: 10, text: "Num 1" },
+  { x: 10, y: 100, text: "Num 2" },
+  { x: 10, y: 190, text: "Num 3" },
+  { x: 10, y: 280, text: "Num 4" },
 ];
 
 resizeCanvas();
@@ -40,14 +40,14 @@ startButton.addEventListener("click", function (currentTime) {
 });
 
 window.addEventListener("keydown", function (event) {
-  if (event.key === "ArrowDown") {
+  if (event.key === "ArrowDown" && !keys["j"]) {
     if (selected === buttons.length - 1) {
       selected = 0;
     } else {
       selected++;
     }
   }
-  if (event.key === "ArrowUp") {
+  if (event.key === "ArrowUp" && !keys["j"]) {
     if (selected === 0) {
       selected = buttons.length - 1;
     } else {
@@ -91,6 +91,14 @@ function gameloop(currentTime) {
       ctx.fillStyle = "white";
     }
     ctx.fillRect(buttons[i].x, buttons[i].y, buttonWidth, buttonHeight);
+    ctx.fillStyle = "black";
+    ctx.font = "24px Arial";
+    ctx.fillText(
+      buttons[i].text,
+      buttons[i].x,
+      buttons[i].y + buttonHeight / 2,
+      buttonWidth,
+    );
   }
 
   endGL();
