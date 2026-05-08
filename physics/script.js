@@ -115,10 +115,10 @@ function physics() {
         player.y += player.velY;
       }
     } else if (
-      (map[Math.floor(player.y / gridSize) - 1][
+      (map[Math.floor((player.velY + player.y) / gridSize)][
         Math.floor(player.x / gridSize)
       ] === 1 ||
-        map[Math.floor(player.y / gridSize) - 1][
+        map[Math.floor((player.velY + player.y) / gridSize)][
           Math.floor((player.width + player.x) / gridSize)
         ] === 1) &&
       player.velY < 0
