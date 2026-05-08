@@ -21,7 +21,7 @@ var map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -93,7 +93,6 @@ function drawPlayer() {
 }
 
 function physics() {
-  var oldY = player.y;
   if (!player.grounded || player.velY < 0) {
     player.grounded = false;
     player.velY += 0.5;
@@ -111,6 +110,13 @@ function physics() {
       } else {
         player.y += player.velY;
       }
+    } else if (
+      map[Math.floor(player.y / gridSize) - 1][Math.floor(player.x / gridSize)] ===
+      1 && player.velY < 0
+    ) {
+      player.y = Math.floor(player.y / gridSize) * gridSize;
+      player.velY = 0;
+      player.grounded = false;
     } else {
       player.y += player.velY;
       player.grounded = false;
