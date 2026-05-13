@@ -21,7 +21,7 @@ var map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -29,7 +29,7 @@ var map = [
 ];
 var gridSize = 50;
 var player = {
-  x: 105,
+  x: 205,
   y: 55,
   width: 40,
   height: 80,
@@ -51,7 +51,7 @@ startButton.addEventListener("click", function (currentTime) {
 });
 
 window.addEventListener("keydown", function (event) {
-  if (event.key === "w" && player.grounded) {
+  if ((event.key === "w" || event.key === "ArrowUp") && player.grounded) {
     player.velY -= 10;
   }
   keys[event.key] = true;
@@ -103,7 +103,7 @@ function physics() {
         Math.floor(player.x / gridSize)
       ] === 1 ||
       map[Math.floor((player.height + player.y) / gridSize)][
-        Math.floor((player.width + player.x) / gridSize)
+        Math.floor((player.width + player.x - 1) / gridSize)
       ] === 1
     ) {
       if (player.velY > 0) {
@@ -119,7 +119,7 @@ function physics() {
         Math.floor(player.x / gridSize)
       ] === 1 ||
         map[Math.floor((player.velY + player.y) / gridSize)][
-          Math.floor((player.width + player.x) / gridSize)
+          Math.floor((player.width + player.x - 1) / gridSize)
         ] === 1) &&
       player.velY < 0
     ) {
@@ -134,7 +134,7 @@ function physics() {
 }
 
 function moveX() {
-  if (keys["a"]) {
+  if ((keys["a"] || keys["ArrowLeft"]) && !(keys["d"] || keys["ArrowRight"])) {
     if (!wallLeft()) {
       player.x -= player.speedX;
       if (
@@ -150,12 +150,13 @@ function moveX() {
           Math.floor((player.x - player.speedX) / gridSize)
         ] === 1
       ) {
-        player.x = (Math.floor(player.x / gridSize) + 1) * gridSize;
+        player.x = Math.floor(player.x / gridSize) * gridSize;
       } else {
         player.x -= player.speedX;
       }
     }
-  } else if (keys["d"]) {
+  }
+  if ((keys["d"] || keys["ArrowRight"]) && !(keys["a"] || keys["ArrowLeft"])) {
     if (!wallRight()) {
       player.x += player.speedX;
       if (
@@ -170,6 +171,12 @@ function moveX() {
       if (
         map[Math.floor(player.y / gridSize)][
           Math.floor((player.x + player.width - 1 + player.speedX) / gridSize)
+        ] === 1 ||
+        map[Math.floor((player.y + player.height - 1) / gridSize)][
+          Math.floor((player.width + player.x - 1 + player.speedX) / gridSize)
+        ] === 1 ||
+        map[Math.floor((player.y + player.height) / 2 / gridSize)][
+          Math.floor((player.width + player.x - 1 + player.speedX) / gridSize)
         ] === 1
       ) {
         player.x =
@@ -184,7 +191,11 @@ function moveX() {
 
 function wallLeft() {
   if (
-    map[Math.floor(player.y / gridSize)][Math.floor(player.x / gridSize)] === 1
+    map[Math.floor(player.y / gridSize)][Math.floor(player.x / gridSize)] ===
+      1 ||
+    map[Math.floor((player.y + player.height - 1) / gridSize)][
+      Math.floor(player.x / gridSize)
+    ] === 1
   ) {
     return true;
   } else {
@@ -196,12 +207,16 @@ function wallRight() {
   if (
     map[Math.floor(player.y / gridSize)][
       Math.floor((player.width + player.x) / gridSize)
+    ] === 1 ||
+    map[Math.floor((player.y + player.height - 1) / gridSize)][
+      Math.floor((player.width + player.x) / gridSize)
+    ] === 1 ||
+    map[Math.floor((player.y + player.height) / 2 / gridSize)][
+      Math.floor((player.width + player.x) / gridSize)
     ] === 1
   ) {
     return true;
-  } else {
-    return false;
-  }
+  } else return false;
 }
 
 function checkGround() {
