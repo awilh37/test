@@ -24,7 +24,7 @@ var square = {
   y: window.innerHeight / 2,
   color: "rgb(132, 0, 209)",
   goRight: true,
-  speed: 5,
+  speed: 3,
 };
 
 var squareMapL = [
