@@ -9,6 +9,7 @@ var keys = {};
 function resizeCanvas() {
   gameCanvas.width = window.innerWidth;
   gameCanvas.height = window.innerHeight;
+  square.y = window.innerHeight / 2 - (squareMap.length / 2) * squarePixelSize;
 }
 
 var startTime = 0;
@@ -49,7 +50,7 @@ var squareMapR = [
 
 var squareMap = squareMapR;
 
-square.y -= (squareMap.length / 2) * squarePixelSize;
+square.y = window.innerHeight / 2 - (squareMap.length / 2) * squarePixelSize;
 
 resizeCanvas();
 
