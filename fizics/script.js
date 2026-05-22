@@ -60,6 +60,8 @@ var player = {
   height: 1.5,
   width: 0.7,
   color: "rgb(137, 0, 0)",
+  velY: 0,
+  gravity: 0.01,
 };
 
 resizeCanvas();
@@ -118,12 +120,53 @@ function drawPlayer() {
   );
 }
 
+function checkDown() {
+  for (i = 0; i < player.width * gridSize; i += 1 / gridSize) {
+    if (
+      map[Math.floor(player.y + player.height)][Math.floor(player.x + i)] === 1
+    ) {
+      return "on";
+    }
+  }
+  for (i = 0; i < player.width * gridSize; i += 1 / gridSize) {
+    if (
+      map[Math.floor(player.y - 1 / gridSize + player.velY)][
+        Math.floor(player.x + i)
+      ] === 1
+    ) {
+      return "vel";
+    }
+  }
+  return "false";
+}
+
+function gravity() {
+  if (velY >= 0) {
+    if (checkDown() === "on") {
+      player.velY = 0;
+      player.y =
+        Math.floor(player.y + player.height - 1 / gridSize) - player.height;
+    }
+    if (checkDown() === "vel") {
+      player.y =
+        Math.floor(player.y + player.height + player.velY - 1 / gridSize) -
+        player.height;
+      player.velY = 0;
+    }
+    if (checkDown() === "false") {
+      player.y += player.velY;
+      player.velY += player.gravity;
+    }
+  }
+}
+
 function gameloop(currentTime) {
   if (!gameState === "running") return;
   startGL(currentTime);
 
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
+  gravity();
   drawMap();
   drawPlayer();
 
