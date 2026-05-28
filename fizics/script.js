@@ -57,12 +57,23 @@ var map = [
 var player = {
   x: 1.5,
   y: 1,
+  xPix: gridSize,
+  yPix: gridSize,
   height: 1.5,
   width: 0.7,
+  heightPix: gridSize,
+  widthPix: gridSize,
   color: "rgb(137, 0, 0)",
   velY: 0,
+  velYPix: gridSize,
   gravity: 0.01,
 };
+
+player.xPix *= player.x;
+player.yPix *= player.y;
+player.heightPix *= player.height;
+player.widthPix *= player.width;
+player.velYPix *= player.velY;
 
 resizeCanvas();
 
@@ -71,8 +82,7 @@ window.addEventListener("resize", resizeCanvas);
 startButton.addEventListener("click", function (currentTime) {
   startMenu.classList.add("hidden");
   gameState = "running";
-  startTime = currentTime;
-  gameloop();
+  requestAnimationFrame(gameloop);
 });
 
 window.addEventListener("keydown", function (event) {
@@ -91,6 +101,11 @@ function startGL(currentTime) {
     frames = 0;
     lastFPSCheck = currentTime;
   }
+  player.xPix = player.x * gridSize;
+  player.yPix = player.y * gridSize;
+  player.heightPix = player.height * gridSize;
+  player.widthPix = player.width * gridSize;
+  player.velYPix = player.velY * gridSize;
 }
 
 function endGL() {
@@ -112,48 +127,40 @@ function drawMap() {
 
 function drawPlayer() {
   ctx.fillStyle = player.color;
-  ctx.fillRect(
-    player.x * gridSize,
-    player.y * gridSize,
-    player.width * gridSize,
-    player.height * gridSize,
-  );
+  ctx.fillRect(player.xPix, player.yPix, player.widthPix, player.heightPix);
 }
 
-function checkDown() {
-  for (i = 0; i < player.width * gridSize; i += 1 / gridSize) {
+function isGround() {
+  for (i = 0; i < player.widthPix; i++) {
     if (
-      map[Math.floor(player.y + player.height)][Math.floor(player.x + i)] === 1
+      map[Math.floor(player.y + player.height)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
     ) {
       return "on";
     }
-  }
-  for (i = 0; i < player.width * gridSize; i += 1 / gridSize) {
     if (
-      map[Math.floor(player.y - 1 / gridSize + player.velY)][
-        Math.floor(player.x + i)
+      map[Math.floor(player.y + player.height + player.velY)][
+        Math.floor((player.xPix + i) / gridSize)
       ] === 1
     ) {
       return "vel";
     }
   }
-  return "false";
+  return "no";
 }
 
 function gravity() {
-  if (velY >= 0) {
-    if (checkDown() === "on") {
-      player.velY = 0;
-      player.y =
-        Math.floor(player.y + player.height - 1 / gridSize) - player.height;
-    }
-    if (checkDown() === "vel") {
-      player.y =
-        Math.floor(player.y + player.height + player.velY - 1 / gridSize) -
-        player.height;
+  if (player.velY >= 0) {
+    if (isGround() === "on") {
       player.velY = 0;
     }
-    if (checkDown() === "false") {
+    if (isGround() === "vel") {
+      player.y =
+        Math.floor(player.y + player.velY + player.height) - player.height;
+      player.velY = 0;
+    }
+    if (isGround() === "no") {
       player.y += player.velY;
       player.velY += player.gravity;
     }
