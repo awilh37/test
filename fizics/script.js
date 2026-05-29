@@ -56,7 +56,7 @@ var map = [
 
 var player = {
   x: 1.5,
-  y: 1,
+  y: 1.5,
   xPix: gridSize,
   yPix: gridSize,
   height: 1.5,
@@ -66,7 +66,9 @@ var player = {
   color: "rgb(137, 0, 0)",
   velY: 0,
   velYPix: gridSize,
-  gravity: 0.01,
+  gravity: 0.005,
+  jumpPower: -0.15,
+  jumpPowerPix: gridSize,
 };
 
 player.xPix *= player.x;
@@ -74,6 +76,7 @@ player.yPix *= player.y;
 player.heightPix *= player.height;
 player.widthPix *= player.width;
 player.velYPix *= player.velY;
+player.jumpPowerPix *= player.jumpPower;
 
 resizeCanvas();
 
@@ -101,11 +104,7 @@ function startGL(currentTime) {
     frames = 0;
     lastFPSCheck = currentTime;
   }
-  player.xPix = player.x * gridSize;
-  player.yPix = player.y * gridSize;
-  player.heightPix = player.height * gridSize;
-  player.widthPix = player.width * gridSize;
-  player.velYPix = player.velY * gridSize;
+  syncPix();
 }
 
 function endGL() {
@@ -130,16 +129,30 @@ function drawPlayer() {
   ctx.fillRect(player.xPix, player.yPix, player.widthPix, player.heightPix);
 }
 
+function syncPix() {
+  player.xPix = player.x * gridSize;
+  player.yPix = player.y * gridSize;
+  player.heightPix = player.height * gridSize;
+  player.widthPix = player.width * gridSize;
+  player.velYPix = player.velY * gridSize;
+  player.jumpPowerPix = player.jumpPower * gridSize;
+}
+
 function isGround() {
   for (i = 0; i < player.widthPix; i++) {
     if (
-      map[Math.floor(player.y + player.height)][
+      map[Math.floor((player.yPix + player.heightPix - 1) / gridSize)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
+    ) {
+      return "in";
+    } else if (
+      map[Math.floor((player.yPix + player.heightPix) / gridSize)][
         Math.floor((player.xPix + i) / gridSize)
       ] === 1
     ) {
       return "on";
-    }
-    if (
+    } else if (
       map[Math.floor(player.y + player.height + player.velY)][
         Math.floor((player.xPix + i) / gridSize)
       ] === 1
@@ -154,6 +167,7 @@ function gravity() {
   if (player.velY >= 0) {
     if (isGround() === "on") {
       player.velY = 0;
+      player.y = Math.floor(player.y + player.height) - player.height;
     }
     if (isGround() === "vel") {
       player.y =
@@ -164,21 +178,92 @@ function gravity() {
       player.y += player.velY;
       player.velY += player.gravity;
     }
+    if (isGround() === "in") {
+      player.y = Math.floor(player.y + player.height) - 1 - player.height;
+      player.velY = 0;
+    }
+  } else {
+    if (isCeiling() === "on") {
+      player.y += 1.1 / gridSize;
+      player.velY = 0;
+    }
+    if (isCeiling() === "vel") {
+      player.y = Math.floor(player.y + player.velY) + 1;
+      player.velY = 0;
+    }
+    if (isCeiling() === "no") {
+      player.y += player.velY;
+      player.velY += player.gravity;
+    }
+    if (isCeiling() === "in") {
+      player.y = Math.floor(player.y) + 1.01;
+      player.velY = 0;
+    }
+  }
+  syncPix();
+  if (isCeiling() === "in") {
+    player.y = Math.floor(player.y) + 1;
+    player.velY = 0;
+  }
+  if (isGround() === "in") {
+    player.y = Math.floor(player.y + player.height) - 1 - player.height;
+    player.velY = 0;
+  }
+  syncPix();
+}
+
+function isCeiling() {
+  for (i = 0; i < player.widthPix; i++) {
+    if (
+      map[Math.floor(player.yPix / gridSize)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
+    ) {
+      return "in";
+    } else if (
+      map[Math.floor((player.yPix - 1) / gridSize)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
+    ) {
+      return "on";
+    } else if (
+      map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
+    ) {
+      return "vel";
+    }
+  }
+  return "no";
+}
+
+function jump() {
+  if (keys["w"] && isGround() === "on") {
+    player.velY = player.jumpPower;
   }
 }
 
 function gameloop(currentTime) {
-  if (!gameState === "running") return;
+  if (gameState != "running") return;
   startGL(currentTime);
 
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
+  jump();
   gravity();
   drawMap();
   drawPlayer();
 
   ctx.fillStyle = "white";
   ctx.fillText("fps: " + fps, map[0].length * gridSize + 10, 10);
+  ctx.fillText("isGround: " + isGround(), map[0].length * gridSize + 10, 20);
+  ctx.fillText("isCeiling: " + isCeiling(), map[0].length * gridSize + 10, 30);
+  ctx.fillText(
+    "player.velY: " + player.velY,
+    map[0].length * gridSize + 10,
+    40,
+  );
+  ctx.fillText("player.y: " + player.y, map[0].length * gridSize + 10, 50);
 
   endGL();
   requestAnimationFrame(gameloop);
