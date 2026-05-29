@@ -25,8 +25,8 @@ var map = [
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   //[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   //[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   //[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -69,7 +69,7 @@ var player = {
   gravity: 0.005,
   jumpPower: -0.15,
   jumpPowerPix: gridSize,
-  speedX: .1
+  speedX: 0.1,
 };
 
 player.xPix *= player.x;
@@ -294,12 +294,56 @@ function isWallR() {
   return "no";
 }
 
+function outWall() {
+  if (isWallL() === "in") {
+    while (isWallL() === "in") {
+      syncPix();
+      player.x = Math.floor(player.xPix / gridSize) + 1;
+      syncPix();
+    }
+  }
+  if (isWallR() === "in") {
+    while (isWallR() === "in") {
+      syncPix();
+      player.x = Math.floor(player.xPix / gridSize) - player.width;
+      syncPix();
+    }
+  }
+}
+
+function moveX() {
+  outWall();
+  if (keys["a"] && !keys["d"]) {
+    if (isWallL() === "no") {
+      player.x -= player.speedX;
+      syncPix();
+      outWall();
+    } else if (isWallL() === "vel") {
+      player.x = Math.floor(player.xPix / gridSize);
+      syncPix();
+      outWall();
+    }
+  }
+  if (keys["d"] && !keys["a"]) {
+    if (isWallR() === "no") {
+      player.x += player.speedX;
+      syncPix();
+      outWall();
+    } else if (isWallR() === "vel") {
+      player.x = Math.floor(player.xPix / gridSize) + 1 - player.width;
+      syncPix();
+      outWall();
+    }
+  }
+}
+
 function gameloop(currentTime) {
   if (gameState != "running") return;
   startGL(currentTime);
 
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
+  moveX();
   jump();
   gravity();
   drawMap();
