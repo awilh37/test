@@ -55,8 +55,8 @@ var map = [
 ];
 
 var player = {
-  x: 1.5,
-  y: 1.5,
+  x: 2,
+  y: 1,
   xPix: gridSize,
   yPix: gridSize,
   height: 1.5,
@@ -69,6 +69,7 @@ var player = {
   gravity: 0.005,
   jumpPower: -0.15,
   jumpPowerPix: gridSize,
+  speedX: .1
 };
 
 player.xPix *= player.x;
@@ -243,6 +244,56 @@ function jump() {
   }
 }
 
+function isWallL() {
+  for (i = 0; i < player.heightPix; i++) {
+    if (
+      map[Math.floor((player.yPix + i) / gridSize)][
+        Math.floor(player.xPix / gridSize)
+      ] === 1
+    ) {
+      return "in";
+    } else if (
+      map[Math.floor((player.yPix + i) / gridSize)][
+        Math.floor((player.xPix - 1) / gridSize)
+      ] === 1
+    ) {
+      return "on";
+    } else if (
+      map[Math.floor((player.yPix + i) / gridSize)][
+        Math.floor((player.xPix - 1 - player.speedX) / gridSize)
+      ] === 1
+    ) {
+      return "vel";
+    }
+  }
+  return "no";
+}
+
+function isWallR() {
+  for (i = 0; i < player.heightPix; i++) {
+    if (
+      map[Math.floor((player.yPix + i) / gridSize)][
+        Math.floor((player.xPix + player.widthPix - 1) / gridSize)
+      ] === 1
+    ) {
+      return "in";
+    } else if (
+      map[Math.floor((player.yPix + i) / gridSize)][
+        Math.floor((player.xPix + player.widthPix) / gridSize)
+      ] === 1
+    ) {
+      return "on";
+    } else if (
+      map[Math.floor((player.yPix + i) / gridSize)][
+        Math.floor((player.xPix + player.widthPix + player.speedX) / gridSize)
+      ] === 1
+    ) {
+      return "vel";
+    }
+  }
+  return "no";
+}
+
 function gameloop(currentTime) {
   if (gameState != "running") return;
   startGL(currentTime);
@@ -258,12 +309,14 @@ function gameloop(currentTime) {
   ctx.fillText("fps: " + fps, map[0].length * gridSize + 10, 10);
   ctx.fillText("isGround: " + isGround(), map[0].length * gridSize + 10, 20);
   ctx.fillText("isCeiling: " + isCeiling(), map[0].length * gridSize + 10, 30);
+  ctx.fillText("isWallL: " + isWallL(), map[0].length * gridSize + 10, 40);
+  ctx.fillText("isWallR: " + isWallR(), map[0].length * gridSize + 10, 50);
   ctx.fillText(
     "player.velY: " + player.velY,
     map[0].length * gridSize + 10,
-    40,
+    60,
   );
-  ctx.fillText("player.y: " + player.y, map[0].length * gridSize + 10, 50);
+  ctx.fillText("player.y: " + player.y, map[0].length * gridSize + 10, 70);
 
   endGL();
   requestAnimationFrame(gameloop);
