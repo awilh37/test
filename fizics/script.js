@@ -22,11 +22,13 @@ var gridSize = 50;
 var map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+  //[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //[1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+  //[1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   //[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   //[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   //[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -59,8 +61,8 @@ var player = {
   y: 1,
   xPix: gridSize,
   yPix: gridSize,
-  height: 1.5,
-  width: 0.7,
+  height: .7,
+  width: 1.5,
   heightPix: gridSize,
   widthPix: gridSize,
   color: "rgb(137, 0, 0)",
@@ -169,17 +171,14 @@ function gravity() {
     if (isGround() === "on") {
       player.velY = 0;
       player.y = Math.floor(player.y + player.height) - player.height;
-    }
-    if (isGround() === "vel") {
+    } else if (isGround() === "vel") {
       player.y =
         Math.floor(player.y + player.velY + player.height) - player.height;
       player.velY = 0;
-    }
-    if (isGround() === "no") {
+    } else if (isGround() === "no") {
       player.y += player.velY;
       player.velY += player.gravity;
-    }
-    if (isGround() === "in") {
+    } else if (isGround() === "in") {
       player.y = Math.floor(player.y + player.height) - 1 - player.height;
       player.velY = 0;
     }
@@ -187,16 +186,18 @@ function gravity() {
     if (isCeiling() === "on") {
       player.y += 1.1 / gridSize;
       player.velY = 0;
-    }
-    if (isCeiling() === "vel") {
-      player.y = Math.floor(player.y + player.velY) + 1;
+    } else if (isCeiling() === "vel") {
+      player.y = Math.floor(player.y + player.velY);
+      syncPix();
+      if (isCeiling() === "in") {
+        player.y -= 1
+        syncPix();
+      }
       player.velY = 0;
-    }
-    if (isCeiling() === "no") {
+    } else if (isCeiling() === "no") {
       player.y += player.velY;
       player.velY += player.gravity;
-    }
-    if (isCeiling() === "in") {
+    } else if (isCeiling() === "in") {
       player.y = Math.floor(player.y) + 1.01;
       player.velY = 0;
     }
@@ -239,7 +240,12 @@ function isCeiling() {
 }
 
 function jump() {
-  if (keys["w"] && isGround() === "on") {
+  if (
+    keys["w"] &&
+    isGround() === "on" &&
+    player.velY === 0 &&
+    isCeiling() === "no"
+  ) {
     player.velY = player.jumpPower;
   }
 }
@@ -330,7 +336,11 @@ function moveX() {
       syncPix();
       outWall();
     } else if (isWallR() === "vel") {
-      player.x = Math.floor(player.xPix / gridSize) + 1 - player.width;
+      player.x =
+        Math.floor(player.xPix / gridSize) +
+        Math.floor(player.width) +
+        1 -
+        player.width;
       syncPix();
       outWall();
     }
@@ -361,6 +371,11 @@ function gameloop(currentTime) {
     60,
   );
   ctx.fillText("player.y: " + player.y, map[0].length * gridSize + 10, 70);
+  ctx.fillText(
+    "player.height: " + player.height,
+    map[0].length * gridSize + 10,
+    80,
+  );
 
   endGL();
   requestAnimationFrame(gameloop);
