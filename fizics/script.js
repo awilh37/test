@@ -191,28 +191,35 @@ function gravity() {
 }
 
 function isCeiling() {
+  var returnMe = "no";
+  for (i = 0; i < player.widthPix; i++) {
+    if (
+      map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
+    ) {
+      returnMe = "vel";
+    }
+  }
+  for (i = 0; i < player.widthPix; i++) {
+    if (
+      map[Math.floor((player.yPix - 1) / gridSize)][
+        Math.floor((player.xPix + i) / gridSize)
+      ] === 1
+    ) {
+      returnMe = "on";
+    }
+  }
   for (i = 0; i < player.widthPix; i++) {
     if (
       map[Math.floor(player.yPix / gridSize)][
         Math.floor((player.xPix + i) / gridSize)
       ] === 1
     ) {
-      return "in";
-    } else if (
-      map[Math.floor((player.yPix - 1) / gridSize)][
-        Math.floor((player.xPix + i) / gridSize)
-      ] === 1
-    ) {
-      return "on";
-    } else if (
-      map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)][
-        Math.floor((player.xPix + i) / gridSize)
-      ] === 1
-    ) {
-      return "vel";
+      returnMe = "in";
     }
   }
-  return "no";
+  return returnMe;
 }
 
 function jump() {
