@@ -38,7 +38,7 @@ var player = {
   xPix: gridSize,
   yPix: gridSize,
   height: 0.7,
-  width: 1.5,
+  width: 0.7,
   heightPix: gridSize,
   widthPix: gridSize,
   color: "rgb(137, 0, 0)",
@@ -193,7 +193,8 @@ function gravity() {
 function isCeiling() {
   var returnMe = "no";
   if (
-    map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)] === undefined ||
+    map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)] ===
+      undefined ||
     map[Math.floor((player.yPix - 1) / gridSize)] === undefined ||
     map[Math.floor(player.yPix / gridSize)] === undefined
   )
