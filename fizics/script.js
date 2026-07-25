@@ -192,6 +192,12 @@ function gravity() {
 
 function isCeiling() {
   var returnMe = "no";
+  if (
+    map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)] === undefined ||
+    map[Math.floor((player.yPix - 1) / gridSize)] === undefined ||
+    map[Math.floor(player.yPix / gridSize)] === undefined
+  )
+    return "in";
   for (i = 0; i < player.widthPix; i++) {
     if (
       map[Math.floor((player.yPix - 1 + player.velYPix) / gridSize)][
