@@ -17,11 +17,11 @@ notPrimes=[]
 
 # functions
 def prime():
-    n=+1
+    n=n+1
     d=1
     q=n/d
     while True:
-        d=+1
+        d=d+1
         q=n/d
         if q>n/2:
             print(str(n),"is prime")

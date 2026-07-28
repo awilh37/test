@@ -44,12 +44,10 @@ var player = {
   color: "rgb(137, 0, 0)",
   velY: 0,
   velYPix: gridSize,
-  gravity: 0.01,
+  gravity: 0.005,
   jumpPower: -0.15,
   jumpPowerPix: gridSize,
   speedX: 0.1,
-  dJump: false,
-  jumpDown: false,
 };
 
 player.xPix *= player.x;
@@ -149,7 +147,6 @@ function gravity() {
     if (isGround() === "on") {
       player.velY = 0;
       player.y = Math.floor(player.y + player.height) - player.height;
-      player.dJump = false;
     } else if (isGround() === "vel") {
       player.y =
         Math.floor(player.y + player.velY + player.height) - player.height;
@@ -233,7 +230,6 @@ function isCeiling() {
 }
 
 function jump() {
-  if (!keys["w"]) player.jumpDown = false;
   if (
     keys["w"] &&
     isGround() === "on" &&
@@ -241,22 +237,6 @@ function jump() {
     isCeiling() === "no"
   ) {
     player.velY = player.jumpPower;
-    player.dJump = true;
-    player.jumpDown = true;
-  } else if (
-    keys["w"] &&
-    isGround() != "on" &&
-    isCeiling() === "no" &&
-    player.dJump &&
-    !player.jumpDown
-  ) {
-    if (player.velY < 0) {
-      player.velY += player.jumpPower;
-      player.dJump = false;
-    } else {
-      player.velY = player.jumpPower;
-      player.djump = false;
-    }
   }
 }
 
